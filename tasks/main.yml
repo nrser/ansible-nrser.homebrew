@@ -1,0 +1,23 @@
+---
+# tasks file for nrser.homebrew
+- name: Ensure homebrew is installed.
+  git:
+    repo: https://github.com/Homebrew/homebrew.git
+    version: master
+    dest: "{{ homebrew_install_path }}"
+    update: no
+  sudo: true
+
+- name: Ensure proper permissions on install path.
+  file:
+    path: "{{ homebrew_install_path }}"
+    group: admin
+    state: directory
+    recurse: true
+    owner: "{{ ansible_env.USER }}"
+  sudo: true
+
+- name: update brew
+  shell: brew update
+  ignore_errors: true
+  when: homebrew_update

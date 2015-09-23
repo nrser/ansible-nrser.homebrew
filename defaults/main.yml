@@ -1,0 +1,8 @@
+---
+# defaults file for nrser.homebrew
+
+# where to install homebrew
+homebrew_install_path: /usr/local
+
+# whether to run `brew update`
+homebrew_update: false
