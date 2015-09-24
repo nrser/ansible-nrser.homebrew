@@ -8,6 +8,14 @@
 # https://github.com/Homebrew/install/blob/master/install
 #
 
+# see if it's there by looking for the `.git` subdir
+# we do this first because ensuring perms on the dir requires sudo,
+# and we don't want to need that for every run
+- name: see if homebrew is already installed
+  stat:
+    path: "{{ homebrew_install_path }}/.git"
+  register: homebrew_git_stat
+
 # make sure the dir exists and has the right perms
 - name: Ensure proper permissions on install path.
   file:
@@ -17,12 +25,7 @@
     recurse: true
     owner: "{{ ansible_env.USER }}"
   sudo: true
-
-# see if it's there by looking for the `.git` subdir
-- name: see if homebrew is already installed
-  stat:
-    path: "{{ homebrew_install_path }}/.git"
-  register: homebrew_git_stat
+  when: not homebrew_git_stat.stat.exists
 
 # if it's not, create a new git repo there
 - name: create a git repo for Homebrew
