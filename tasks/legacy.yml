@@ -1,0 +1,69 @@
+---
+# old tasks file for nrser.homebrew that installed directly via a git checkout
+# 
+# homebrew since changed where the repo lived and how versions / branches /
+# tags / whatever work and this broke everything.
+# 
+# now gonna use the install script i guess...
+
+# the directory may not be empty so we have to do some screwy stuff...
+#
+# adapted from homebrew's install script
+# 
+# https://github.com/Homebrew/install/blob/master/install
+#
+
+# see if it's there by looking for the `.git` subdir
+# we do this first because ensuring perms on the dir requires sudo,
+# and we don't want to need that for every run
+- name: see if homebrew is already installed
+  stat:
+    path: "{{ homebrew_install_path }}/.git"
+  register: homebrew_git_stat
+
+# make sure the dir exists and has the right perms
+- name: Ensure proper permissions on install path.
+  file:
+    path: "{{ homebrew_install_path }}"
+    group: admin
+    state: directory
+    recurse: true
+    owner: "{{ ansible_env.USER }}"
+  sudo: true
+  when: not homebrew_git_stat.stat.exists
+
+# if it's not, create a new git repo there
+- name: create a git repo for Homebrew
+  shell: git init -q
+  args:
+    chdir: "{{ homebrew_install_path }}"
+  when: not homebrew_git_stat.stat.exists
+
+- name: add homebrew git remote.origin.url
+  shell: git config remote.origin.url https://github.com/Homebrew/homebrew
+  args:
+    chdir: "{{ homebrew_install_path }}"
+  when: not homebrew_git_stat.stat.exists
+
+- name: add homebrew git remote.origin.fetch
+  shell: git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+  args:
+    chdir: "{{ homebrew_install_path }}"
+  when: not homebrew_git_stat.stat.exists
+
+- name: do homebrew git fetch
+  shell: git fetch origin master:refs/remotes/origin/master -n --depth=1
+  args:
+    chdir: "{{ homebrew_install_path }}"
+  when: not homebrew_git_stat.stat.exists
+
+- name: do homebrew git reset
+  shell: git reset --hard origin/master
+  args:
+    chdir: "{{ homebrew_install_path }}"
+  when: not homebrew_git_stat.stat.exists
+
+- name: update brew
+  shell: brew update
+  ignore_errors: true
+  when: homebrew_update
