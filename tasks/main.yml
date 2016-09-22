@@ -18,4 +18,5 @@
 
 - name: update homebrew itself and all formulas
   command: brew update
+  when: homebrew_update 
   

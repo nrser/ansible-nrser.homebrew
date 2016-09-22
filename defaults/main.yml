@@ -5,4 +5,4 @@
 homebrew_install_path: /usr/local
 
 # whether to run `brew update`
-homebrew_update: false
+homebrew_update: true
